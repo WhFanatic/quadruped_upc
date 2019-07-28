@@ -1,0 +1,16 @@
+### Posture parameters
+
+### note: the order of the terms should be in correspondence with the program
+
+# Initial Posture (Squat Height, Stride Forward Length, Stride Backward length)
+
+0.5	0.6	0.7	$ init
+
+# Gait Parameters (Step Length, Step Height, Speed)
+
+0.1	0.2	0.3	$ walk
+0.4	0.5	0.6	$ trot
+0.7	0.8	0.9	$ climb
+0.3	0.2	0.1	$ obstacle
+0.6	0.5	0.4	$ jump
+0.9	0.8	0.7	$ run
