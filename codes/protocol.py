@@ -28,8 +28,9 @@ class SensorPackage():
 
 		# record all received data in local files, named by local time
 		file_prefix = time.strftime("%y%m%d%H%M%S", time.localtime())
-		if not os.path.exists('log'): os.mkdir('log')
 		self.filenames = { key:'log_%s_%s.txt'%(file_prefix, key) for key in  self.data.keys()}
+		self.filepath = '../log/'
+		if not os.path.exists(self.filepath): os.mkdir(self.filepath)
 
 	def process(self, datastring):
 		if not self.checkDataString(datastring): return
@@ -92,7 +93,7 @@ class SensorPackage():
 	def bufferOut(self): # write the buffer to file and reset the buffer state (in case the buffer is full)
 		for key in self.data.keys():
 			if self.buflen[key] == self.buflen_max: # only the full-buffer terms will be written
-				with open('log/'+self.filenames[key], 'a') as fp:
+				with open(self.filepath+self.filenames[key], 'a') as fp:
 					for frame in self.data_buf[key]:
 						fp.write( '\t'.join(['%.18e'%n for n in np.ravel(frame)]) + '\n' )
 
@@ -193,8 +194,8 @@ class ParameterPackage():
 		file_prefix = time.strftime("%y%m%d%H%M%S", time.localtime())
 		self.default_file = 'para_default.txt'
 		self.current_file = 'para_%s.txt'%file_prefix
-
-		if not os.path.exists('para'): os.mkdir('para')
+		self.filepath = '../para/'
+		if not os.path.exists(self.filepath): os.mkdir(self.filepath)
 		try: self.load(self.default_file)
 		except IOError: self.save(self.default_file)
 
@@ -224,8 +225,7 @@ class ParameterPackage():
 		return datastring
 
 	def load(self, filename=None):
-		if not filename:	filename = self.current_file
-		with open('para/'+filename, 'r') as fp:
+		with open(self.filepath + (filename if filename else self.current_file), 'r') as fp:
 			for line in fp:
 				if '#' in line:	line = line[:line.index('#')]
 				line = line.strip()
@@ -236,8 +236,7 @@ class ParameterPackage():
 					self.data[key][:] = [ float(s) for s in values ]
 
 	def save(self, filename=None):
-		if not filename:	filename = self.current_file
-		with open('para/'+filename, 'w') as fp:
+		with open(self.filepath + (filename if filename else self.current_file), 'w') as fp:
 			for key in self.data.keys():
 				fp.write( '\t'.join(['%.18e'%n for n in self.data[key]]) + '\t$ %s\n'%key )
 
