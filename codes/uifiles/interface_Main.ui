@@ -440,21 +440,21 @@
           </spacer>
          </item>
          <item row="0" column="1">
-          <widget class="MplWidget" name="widget_4" native="true">
+          <widget class="DynamicGraphWidget_curve" name="widget_4" native="true">
            <property name="autoFillBackground">
             <bool>false</bool>
            </property>
           </widget>
          </item>
          <item row="1" column="1">
-          <widget class="MplWidget" name="widget_6" native="true">
+          <widget class="DynamicGraphWidget_curve" name="widget_6" native="true">
            <property name="autoFillBackground">
             <bool>false</bool>
            </property>
           </widget>
          </item>
          <item row="2" column="1">
-          <widget class="MplWidget" name="widget_8" native="true">
+          <widget class="DynamicGraphWidget_curve" name="widget_8" native="true">
            <property name="autoFillBackground">
             <bool>false</bool>
            </property>
@@ -559,21 +559,21 @@
           </spacer>
          </item>
          <item row="0" column="1">
-          <widget class="MplWidget" name="widget_9" native="true">
+          <widget class="DynamicGraphWidget_curve" name="widget_9" native="true">
            <property name="autoFillBackground">
             <bool>false</bool>
            </property>
           </widget>
          </item>
          <item row="1" column="1">
-          <widget class="MplWidget" name="widget_11" native="true">
+          <widget class="DynamicGraphWidget_curve" name="widget_11" native="true">
            <property name="autoFillBackground">
             <bool>false</bool>
            </property>
           </widget>
          </item>
          <item row="2" column="1">
-          <widget class="MplWidget" name="widget_13" native="true">
+          <widget class="DynamicGraphWidget_curve" name="widget_13" native="true">
            <property name="autoFillBackground">
             <bool>false</bool>
            </property>
@@ -664,21 +664,21 @@
           </spacer>
          </item>
          <item row="0" column="1">
-          <widget class="MplWidget" name="widget_10" native="true">
+          <widget class="DynamicGraphWidget_curve" name="widget_10" native="true">
            <property name="autoFillBackground">
             <bool>false</bool>
            </property>
           </widget>
          </item>
          <item row="1" column="1">
-          <widget class="MplWidget" name="widget_12" native="true">
+          <widget class="DynamicGraphWidget_curve" name="widget_12" native="true">
            <property name="autoFillBackground">
             <bool>false</bool>
            </property>
           </widget>
          </item>
          <item row="2" column="1">
-          <widget class="MplWidget" name="widget_15" native="true"/>
+          <widget class="DynamicGraphWidget_curve" name="widget_15" native="true"/>
          </item>
         </layout>
        </item>
@@ -758,21 +758,21 @@
           </spacer>
          </item>
          <item row="0" column="1">
-          <widget class="MplWidget" name="widget" native="true">
+          <widget class="DynamicGraphWidget_curve" name="widget" native="true">
            <property name="autoFillBackground">
             <bool>false</bool>
            </property>
           </widget>
          </item>
          <item row="1" column="1">
-          <widget class="MplWidget" name="widget_5" native="true">
+          <widget class="DynamicGraphWidget_curve" name="widget_5" native="true">
            <property name="autoFillBackground">
             <bool>false</bool>
            </property>
           </widget>
          </item>
          <item row="2" column="1">
-          <widget class="MplWidget" name="widget_7" native="true">
+          <widget class="DynamicGraphWidget_curve" name="widget_7" native="true">
            <property name="autoFillBackground">
             <bool>false</bool>
            </property>
@@ -873,21 +873,21 @@
           </spacer>
          </item>
          <item row="0" column="1">
-          <widget class="MplWidget" name="widget_14" native="true">
+          <widget class="DynamicGraphWidget_curve" name="widget_14" native="true">
            <property name="autoFillBackground">
             <bool>false</bool>
            </property>
           </widget>
          </item>
          <item row="1" column="1">
-          <widget class="MplWidget" name="widget_16" native="true">
+          <widget class="DynamicGraphWidget_curve" name="widget_16" native="true">
            <property name="autoFillBackground">
             <bool>false</bool>
            </property>
           </widget>
          </item>
          <item row="2" column="1">
-          <widget class="MplWidget" name="widget_17" native="true">
+          <widget class="DynamicGraphWidget_curve" name="widget_17" native="true">
            <property name="autoFillBackground">
             <bool>false</bool>
            </property>
@@ -992,21 +992,21 @@
           </spacer>
          </item>
          <item row="0" column="1">
-          <widget class="MplWidget" name="widget_18" native="true">
+          <widget class="DynamicGraphWidget_curve" name="widget_18" native="true">
            <property name="autoFillBackground">
             <bool>false</bool>
            </property>
           </widget>
          </item>
          <item row="1" column="1">
-          <widget class="MplWidget" name="widget_19" native="true">
+          <widget class="DynamicGraphWidget_curve" name="widget_19" native="true">
            <property name="autoFillBackground">
             <bool>false</bool>
            </property>
           </widget>
          </item>
          <item row="2" column="1">
-          <widget class="MplWidget" name="widget_20" native="true">
+          <widget class="DynamicGraphWidget_curve" name="widget_20" native="true">
            <property name="autoFillBackground">
             <bool>false</bool>
            </property>
@@ -1097,21 +1097,21 @@
           </spacer>
          </item>
          <item row="0" column="1">
-          <widget class="MplWidget" name="widget_21" native="true">
+          <widget class="DynamicGraphWidget_curve" name="widget_21" native="true">
            <property name="autoFillBackground">
             <bool>false</bool>
            </property>
           </widget>
          </item>
          <item row="1" column="1">
-          <widget class="MplWidget" name="widget_22" native="true">
+          <widget class="DynamicGraphWidget_curve" name="widget_22" native="true">
            <property name="autoFillBackground">
             <bool>false</bool>
            </property>
           </widget>
          </item>
          <item row="2" column="1">
-          <widget class="MplWidget" name="widget_23" native="true"/>
+          <widget class="DynamicGraphWidget_curve" name="widget_23" native="true"/>
          </item>
         </layout>
        </item>
@@ -1191,21 +1191,21 @@
           </spacer>
          </item>
          <item row="0" column="1">
-          <widget class="MplWidget" name="widget_24" native="true">
+          <widget class="DynamicGraphWidget_curve" name="widget_24" native="true">
            <property name="autoFillBackground">
             <bool>false</bool>
            </property>
           </widget>
          </item>
          <item row="1" column="1">
-          <widget class="MplWidget" name="widget_25" native="true">
+          <widget class="DynamicGraphWidget_curve" name="widget_25" native="true">
            <property name="autoFillBackground">
             <bool>false</bool>
            </property>
           </widget>
          </item>
          <item row="2" column="1">
-          <widget class="MplWidget" name="widget_26" native="true">
+          <widget class="DynamicGraphWidget_curve" name="widget_26" native="true">
            <property name="autoFillBackground">
             <bool>false</bool>
            </property>
@@ -1306,21 +1306,21 @@
           </spacer>
          </item>
          <item row="0" column="1">
-          <widget class="MplWidget" name="widget_29" native="true">
+          <widget class="DynamicGraphWidget_curve" name="widget_29" native="true">
            <property name="autoFillBackground">
             <bool>false</bool>
            </property>
           </widget>
          </item>
          <item row="1" column="1">
-          <widget class="MplWidget" name="widget_30" native="true">
+          <widget class="DynamicGraphWidget_curve" name="widget_30" native="true">
            <property name="autoFillBackground">
             <bool>false</bool>
            </property>
           </widget>
          </item>
          <item row="2" column="1">
-          <widget class="MplWidget" name="widget_31" native="true">
+          <widget class="DynamicGraphWidget_curve" name="widget_31" native="true">
            <property name="autoFillBackground">
             <bool>false</bool>
            </property>
@@ -1425,21 +1425,21 @@
           </spacer>
          </item>
          <item row="0" column="1">
-          <widget class="MplWidget" name="widget_32" native="true">
+          <widget class="DynamicGraphWidget_curve" name="widget_32" native="true">
            <property name="autoFillBackground">
             <bool>false</bool>
            </property>
           </widget>
          </item>
          <item row="1" column="1">
-          <widget class="MplWidget" name="widget_33" native="true">
+          <widget class="DynamicGraphWidget_curve" name="widget_33" native="true">
            <property name="autoFillBackground">
             <bool>false</bool>
            </property>
           </widget>
          </item>
          <item row="2" column="1">
-          <widget class="MplWidget" name="widget_34" native="true">
+          <widget class="DynamicGraphWidget_curve" name="widget_34" native="true">
            <property name="autoFillBackground">
             <bool>false</bool>
            </property>
@@ -1543,21 +1543,21 @@
           </spacer>
          </item>
          <item row="0" column="1">
-          <widget class="MplWidget" name="widget_36" native="true">
+          <widget class="DynamicGraphWidget_curve" name="widget_36" native="true">
            <property name="autoFillBackground">
             <bool>false</bool>
            </property>
           </widget>
          </item>
          <item row="1" column="1">
-          <widget class="MplWidget" name="widget_37" native="true">
+          <widget class="DynamicGraphWidget_curve" name="widget_37" native="true">
            <property name="autoFillBackground">
             <bool>false</bool>
            </property>
           </widget>
          </item>
          <item row="2" column="1">
-          <widget class="MplWidget" name="widget_38" native="true"/>
+          <widget class="DynamicGraphWidget_curve" name="widget_38" native="true"/>
          </item>
         </layout>
        </item>
@@ -1637,21 +1637,21 @@
           </spacer>
          </item>
          <item row="0" column="1">
-          <widget class="MplWidget" name="widget_39" native="true">
+          <widget class="DynamicGraphWidget_curve" name="widget_39" native="true">
            <property name="autoFillBackground">
             <bool>false</bool>
            </property>
           </widget>
          </item>
          <item row="1" column="1">
-          <widget class="MplWidget" name="widget_40" native="true">
+          <widget class="DynamicGraphWidget_curve" name="widget_40" native="true">
            <property name="autoFillBackground">
             <bool>false</bool>
            </property>
           </widget>
          </item>
          <item row="2" column="1">
-          <widget class="MplWidget" name="widget_41" native="true">
+          <widget class="DynamicGraphWidget_curve" name="widget_41" native="true">
            <property name="autoFillBackground">
             <bool>false</bool>
            </property>
@@ -1756,10 +1756,10 @@
         </spacer>
        </item>
        <item row="1" column="0">
-        <widget class="MplWidget" name="widget_3" native="true"/>
+        <widget class="DynamicGraphWidget_angle" name="widget_3" native="true"/>
        </item>
        <item row="3" column="0">
-        <widget class="MplWidget" name="widget_2" native="true"/>
+        <widget class="DynamicGraphWidget_angle" name="widget_2" native="true"/>
        </item>
       </layout>
      </widget>
@@ -1832,10 +1832,10 @@
         </spacer>
        </item>
        <item row="1" column="0">
-        <widget class="MplWidget" name="widget_27" native="true"/>
+        <widget class="DynamicGraphWidget_veloc" name="widget_27" native="true"/>
        </item>
        <item row="3" column="0">
-        <widget class="MplWidget" name="widget_28" native="true"/>
+        <widget class="DynamicGraphWidget_veloc" name="widget_28" native="true"/>
        </item>
       </layout>
      </widget>
@@ -1859,7 +1859,19 @@
  </widget>
  <customwidgets>
   <customwidget>
-   <class>MplWidget</class>
+   <class>DynamicGraphWidget_curve</class>
+   <extends>QWidget</extends>
+   <header>plot</header>
+   <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>DynamicGraphWidget_angle</class>
+   <extends>QWidget</extends>
+   <header>plot</header>
+   <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>DynamicGraphWidget_veloc</class>
    <extends>QWidget</extends>
    <header>plot</header>
    <container>1</container>

@@ -103,14 +103,14 @@ class MainWindow(QW.QMainWindow, interface_Main.Ui_MainWindow):
 				[self.widget_36, self.widget_37, self.widget_38]	]	# RB X | D | K
 		]
 
-		for ws in self.widget_group1:
-			for i in range(4):
-				for j in range(3):
-					ws[i][j].setup(0)
-		self.widget_3.setup(1)
-		self.widget_2.setup(2)
-		self.widget_27.setup(3)
-		self.widget_28.setup(4)
+		# for ws in self.widget_group1:
+		# 	for i in range(4):
+		# 		for j in range(3):
+		# 			ws[i][j].setup(0)
+		# self.widget_3.setup(1)
+		# self.widget_2.setup(2)
+		# self.widget_27.setup(3)
+		# self.widget_28.setup(4)
 
 
 		# set up attributes
@@ -211,14 +211,14 @@ class MainWindow(QW.QMainWindow, interface_Main.Ui_MainWindow):
 			widgets_curve = self.widget_group1[self.tabWidget.currentIndex()]
 			for i in range(4):
 				for j in range(3):
-					widgets_curve[i][j].update([
+					widgets_curve[i][j].update(*[
 						buf[key+'_time'], buf[key][:,i,j],		# real data
 						buf[key+'_time'], buf[key][:,i,j]-0.1	# expected data
 					])
 
 			if self.tabWidget_2.currentIndex() == 0:
-				self.widget_3.update(frame['imu'][0])
-				self.widget_2.update(frame['imu'][1])
+				self.widget_3.update(*frame['imu'][0])
+				self.widget_2.update(*frame['imu'][1])
 			elif self.tabWidget_2.currentIndex() == 1:
 				pass
 
