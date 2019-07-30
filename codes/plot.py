@@ -2,6 +2,46 @@ import numpy as np
 import pyqtgraph as pg
 from PyQt5 import QtCore as QC
 
+class DynamicGraphWidget_curves(pg.GraphicsLayoutWidget):
+	def __init__(self, parent=None):
+		super(DynamicGraphWidget_curves, self).__init__(parent)
+
+		self.ci.layout.setContentsMargins(0, 0, 0, 0)
+		self.ci.layout.setSpacing(0)
+
+		self.keys = ['LFX', 'RFX', 'LFD', 'RFD', 'LFK', 'RFK', 'LBX', 'RBX', 'LBD', 'RBD', 'LBK', 'RBK']
+		self.figs = {}
+		self.crvs = {}
+		self.refs = {}
+
+		for key in self.keys:
+			if self.keys.index(key) and not self.keys.index(key)%2: self.nextRow()
+
+			fig = self.addPlot()
+			fig.setRange(yRange=(0,1))
+			fig.setMouseEnabled(x=False, y=False)
+			fig.disableAutoRange()
+			fig.showGrid(x=True, y=True, alpha=0.5)
+			fig.hideAxis('bottom')
+			fig.hideAxis('left')
+			fig.setTitle(key)
+
+
+			self.figs[key] = fig
+			self.crvs[key] = fig.plot([], [])
+			self.refs[key] = fig.plot([], [], pen={'style':QC.Qt.DotLine})
+
+		self.ran = 5.0
+
+	def update(self, time, data, ref_time=[], ref_data=[]):
+		x1, x2, ran = np.min(time), np.max(time), self.ran
+		xRange = (x1, x1+ran) if (x2-x1<ran) else (x2-ran, x2)
+		for i in range(4):
+			for j in range(3):
+				key = self.keys[ j*2 + int(i/2)*6 + i%2 ]
+				self.figs[key].setRange(xRange=xRange)
+				self.crvs[key].setData(time, data[:,i,j])
+				if len(ref_time): self.refs[key].setData(ref_time, ref_data[:,i,j])
 
 class DynamicGraphWidget_curve(pg.GraphicsLayoutWidget):
 	def __init__(self, parent=None):
@@ -12,6 +52,8 @@ class DynamicGraphWidget_curve(pg.GraphicsLayoutWidget):
 
 		self.fig = self.addPlot()
 		self.fig.setRange(yRange=(0,1))
+		self.fig.setMouseEnabled(x=False, y=False)
+		self.fig.disableAutoRange()
 		self.fig.showGrid(x=True, y=True, alpha=0.5)
 		self.fig.hideAxis('bottom')
 		self.fig.hideAxis('left')
@@ -40,6 +82,8 @@ class DynamicGraphWidget_angle(pg.GraphicsLayoutWidget):
 		
 		self.fig = self.addPlot()
 		self.fig.setRange(xRange=(-1.2,1.2), yRange=(-1.2,1.2))
+		self.fig.setMouseEnabled(x=False, y=False)
+		self.fig.disableAutoRange()
 		self.fig.hideAxis('bottom')
 		self.fig.hideAxis('left')
 
@@ -71,7 +115,7 @@ class DynamicGraphWidget_angle(pg.GraphicsLayoutWidget):
 		if hasattr(self, 'arr2'):	self.fig.removeItem(self.arr2)
 		rr = 1.15 # rescale the coordinate value to make the plot nice
 		self.crv0.setData([0,x/rr], [0,y/rr])
-		self.arr1 = pg.ArrowItem(pen=None, brush='w', headLen=10, tipangle=45, angle=rad/PI*180, pos=(x,y))
+		self.arr1 = pg.ArrowItem(pen=None, brush='w', headLen=8, tipAngle=45, angle=rad/PI*180, pos=(x,y))
 		self.arr2 = pg.ArrowItem(pen=None, brush='r', headLen=10, tipAngle=45, angle=alfa/PI*180+90, pos=(rr*np.sin(alfa), rr*np.cos(alfa))) # yaw is relative to north
 		self.fig.addItem(self.arr1)
 		self.fig.addItem(self.arr2)

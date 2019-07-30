@@ -356,19 +356,15 @@ class test():
 		self.clt.open()
 
 
-# c = test()
-# c = test('127.0.0.1')
+if __name__ == '__main__':
+	
+	datastring = pack( '3B', 0x01, 0x01, 0x01 ) + b'test'
 
-
-
-
-# datastring = pack( '3B', 0x01, 0x01, 0x01 ) + b'test'
-
-# s = Server()
-# while True:
-# 	s.send(datastring)
-# 	time.sleep(0.02)
-# 	s.interact()
+	s = Server()
+	while True:
+		s.send(datastring)
+		time.sleep(0.02)
+		s.interact()
 
 
 
