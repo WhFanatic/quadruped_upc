@@ -103,15 +103,7 @@ class MainWindow(QW.QMainWindow, interface_Main.Ui_MainWindow):
 				[self.widget_36, self.widget_37, self.widget_38]	]	# RB X | D | K
 		]
 
-		# for ws in self.widget_group1:
-		# 	for i in range(4):
-		# 		for j in range(3):
-		# 			ws[i][j].setup(0)
-		# self.widget_3.setup(1)
-		# self.widget_2.setup(2)
-		# self.widget_27.setup(3)
-		# self.widget_28.setup(4)
-
+		self.widget_2.scale = 2.0
 
 		# set up attributes
 		self.client = Client()
@@ -194,7 +186,7 @@ class MainWindow(QW.QMainWindow, interface_Main.Ui_MainWindow):
 		self.prot.distrib(self.client.recv())
 		if self.prot.cnt > last_cnt:
 			if self.prot.cnt % 5 == 0:	self.update_figdata()
-			if self.prot.cnt % 10 == 0:	self.update_figure()
+			if self.prot.cnt % 5 == 0:	self.update_figure()
 
 	def update_figdata(self):	# update figure data (only data, not figure)
 		if not self.sens.checkBufferEmpty():

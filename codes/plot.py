@@ -1,16 +1,20 @@
 import numpy as np
-from PyQt5 import QtWidgets as QW
-from PyQt5 import QtCore as QC
 import pyqtgraph as pg
+from PyQt5 import QtCore as QC
 
 
 class DynamicGraphWidget_curve(pg.GraphicsLayoutWidget):
 	def __init__(self, parent=None):
 		super(DynamicGraphWidget_curve, self).__init__(parent)
 
+		self.ci.layout.setContentsMargins(0, 0, 0, 0)
+		self.ci.layout.setSpacing(0)
+
 		self.fig = self.addPlot()
 		self.fig.setRange(yRange=(0,1))
 		self.fig.showGrid(x=True, y=True, alpha=0.5)
+		self.fig.hideAxis('bottom')
+		self.fig.hideAxis('left')
 
 		self.crv = self.fig.plot([], [])
 		self.crv0= self.fig.plot([], [], pen={'style':QC.Qt.DotLine})
@@ -23,10 +27,17 @@ class DynamicGraphWidget_curve(pg.GraphicsLayoutWidget):
 		self.crv.setData(x, y)
 		self.crv0.setData(x0, y0)
 
+
+# IMU data define:
+# coordinate: x -> front, y -> left, z -> up
+# positive direction: yaw -> turn right, pitch -> headup, roll -> roll left
 class DynamicGraphWidget_angle(pg.GraphicsLayoutWidget):
 	def __init__(self, parent=None):
 		super(DynamicGraphWidget_angle, self).__init__(parent)
 
+		self.ci.layout.setContentsMargins(0, 0, 0, 0)
+		self.ci.layout.setSpacing(0)
+		
 		self.fig = self.addPlot()
 		self.fig.setRange(xRange=(-1.2,1.2), yRange=(-1.2,1.2))
 		self.fig.hideAxis('bottom')
@@ -34,29 +45,21 @@ class DynamicGraphWidget_angle(pg.GraphicsLayoutWidget):
 
 		self.crv0 = self.fig.plot([], [], pen={'width':3, 'color':'w'})
 
-		# draw indicator lines at inclination angle 30, 60, 90
-		for r in (0.5, 3**0.5/2, 1.0):
+		self.scale = 1.0
+
+		for r in (0.5, 3**0.5/2, 1.0):	# draw indicator lines at inclination angle 30, 60, 90
 			x = r * np.cos( np.linspace(0, 2*np.pi, 180) )
 			y = r * np.sin( np.linspace(0, 2*np.pi, 180) )
 			crv = self.fig.plot(x, y)
 			crv.setPen(style=QC.Qt.DotLine)
 
-		self.scale = 1.0
-
-		self.update(45,45,45)
-
 	def update(self, yaw, pitch, roll):
-		# IMU data define:
-		# coordinate: x -> front, y -> left, z -> up
-		# positive direction: yaw -> turn right, pitch -> headup, roll -> roll left
-
 		PI = np.pi
-		# rescale the data so that they can all be treated as angles
+		# rescale and limitate the data so that they can all be treated as angles
 		alfa, beta, gama = [ n*PI/180/self.scale for n in (yaw, pitch, roll) ]
-		# limit the angles (-180<=alfa<=180, -90<=beta<=90, -90<=gama<=90)
-		if abs(alfa) > PI:		alfa = PI * np.sign(alfa)
-		if abs(beta) > PI/2:	beta = PI/2 * np.sign(beta)
-		if abs(gama) > PI/2:	gama = PI/2 * np.sign(gama)
+		if abs(alfa) > PI:		alfa = PI * np.sign(alfa)	# -180 <= alfa <= 180
+		if abs(beta) > PI/2:	beta = PI/2 * np.sign(beta)	# -90 <= beta <= 90
+		if abs(gama) > PI/2:	gama = PI/2 * np.sign(gama)	# -90 <= gama <= 90
 
 		# the projection of (unit vector erected on the body) on (the un-tumbled body system)
 		x =-np.tan(beta) / (1+np.tan(beta)**2+np.tan(gama)**2)**0.5
@@ -66,9 +69,10 @@ class DynamicGraphWidget_angle(pg.GraphicsLayoutWidget):
 		
 		if hasattr(self, 'arr1'):	self.fig.removeItem(self.arr1)
 		if hasattr(self, 'arr2'):	self.fig.removeItem(self.arr2)
-		self.crv0.setData([0,x], [0,y])
-		self.arr1 = pg.ArrowItem(pen=None, brush='w', tipangle=30, angle=rad/PI*180, pos=(x,y))
-		self.arr2 = pg.ArrowItem(pen=None, brush='r', tipAngle=45, angle=alfa/PI*180+90, pos=(1.1*np.sin(alfa), 1.1*np.cos(alfa))) # yaw is relative to north
+		rr = 1.15 # rescale the coordinate value to make the plot nice
+		self.crv0.setData([0,x/rr], [0,y/rr])
+		self.arr1 = pg.ArrowItem(pen=None, brush='w', headLen=10, tipangle=45, angle=rad/PI*180, pos=(x,y))
+		self.arr2 = pg.ArrowItem(pen=None, brush='r', headLen=10, tipAngle=45, angle=alfa/PI*180+90, pos=(rr*np.sin(alfa), rr*np.cos(alfa))) # yaw is relative to north
 		self.fig.addItem(self.arr1)
 		self.fig.addItem(self.arr2)
 
@@ -82,6 +86,8 @@ class DynamicGraphWidget_veloc(pg.GraphicsLayoutWidget):
 
 if __name__ == '__main__':
 	import sys
+	from PyQt5 import QtWidgets as QW
+
 	app = QW.QApplication(sys.argv)
 
 	# ui = DynamicGraphWidget_curve()
