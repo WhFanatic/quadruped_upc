@@ -16,12 +16,12 @@ class SensorPackage():
 			'forc_time': 0.0,
 			'disp_time': 0.0,
 			'foot_time': 0.0,
-			'imt_time' : 0.0	}
+			'imu_time' : 0.0	}
 
 		# mark which term is updated and should be added into data buffer
 		self.bufinflag = { key:False for key in self.data.keys() }
 
-		# data buffer. store every frame of data up to a maximum length, for file writing
+		# data buffer, store every frame of data up to a maximum length, for file writing
 		self.buflen_max = buflen_max
 		self.buflen = { key:0 for key in self.data.keys() } # keep track on the length of every term in dictionary. This length is also the index of the next element to be added
 		self.data_buf = { key:np.zeros([self.buflen_max, *np.shape(self.data[key])]) for key in self.data.keys() } # this is equivalent to: self.data_buf = { 'forc': np.zeros([self.buflen_max,4,3]), ... }

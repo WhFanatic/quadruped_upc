@@ -20,12 +20,13 @@ class looptimer():
 		self.flag = False
 
 	def is_alive(self):
-		return hasattr(self, 'th') and self.th.is_alive()
+		try:	return self.thrd.is_alive()
+		except:	return False
 
 	def __start_loop(self):
 		if not self.is_alive():
-			self.th = threading.Thread(target=self.__loop)
-			self.th.start()
+			self.thrd = threading.Thread(target=self.__loop, daemon=True) # daemon means the thread terminates as the main thread exits
+			self.thrd.start()
 
 	def __loop(self):
 		while self.flag:
@@ -310,7 +311,8 @@ class Client():
 		if self.heartbeat in self.O_socket:	self.write()
 
 	def is_opened(self):
-		return hasattr(self, 'sk') and (self.sk.fileno() != -1)
+		try:	return self.sk.fileno() != -1
+		except:	return False
 
 	def get_connection_state(self):
 		return self.flag and self.is_opened()

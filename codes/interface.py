@@ -86,6 +86,9 @@ class MainWindow(QW.QMainWindow, interface_Main.Ui_MainWindow):
 
 		# set up dynamic figures
 		self.widget_2.scale = 2.0
+		for key in self.widget_5.figs.keys(): # set the title of foot end force figures to LFX, LFY, LFZ, ...
+			if key[-1] == 'D': self.widget_5.figs[key].setTitle(key[:2]+'Y')
+			if key[-1] == 'K': self.widget_5.figs[key].setTitle(key[:2]+'Z')
 
 		# set up attributes
 		self.client = Client()
@@ -103,14 +106,14 @@ class MainWindow(QW.QMainWindow, interface_Main.Ui_MainWindow):
 
 
 		# set up timers
-		self.timer0 = QC.QTimer() # control the frequency of checking connection state
-		self.timer1 = QC.QTimer() # control the frequency of communication (receiving data)
+		self.timer0 = QC.QTimer() # Check connection state
+		self.timer1 = QC.QTimer() # Communication (receive data)
 
 		self.timer0.timeout.connect(self.checkConnection)
 		self.timer1.timeout.connect(self.hear)
 
 		self.timer0.start(1000) # check connection state every 1 second, start as soon as the UI is launched
-		self.timer1.setInterval(80)
+		self.timer1.setInterval(40)
 
 
 	### set up slots
@@ -147,12 +150,12 @@ class MainWindow(QW.QMainWindow, interface_Main.Ui_MainWindow):
 		self.client.send(self.prot.collect(typ=0x03, ack=0x02))
 
 	## figure tab
-	@pyqtSlot()
-	def on_tabWidget_currentIndexChanged(self):
-		self.update_figure()
-	@pyqtSlot()
-	def on_tabWidget_2_currentIndexChanged(self):
-		self.update_figure()
+	@pyqtSlot(int)
+	def on_tabWidget_currentChanged(self):
+		self.update_figure_1()
+	@pyqtSlot(int)
+	def on_tabWidget_2_currentChanged(self):
+		self.update_figure_2()
 
 
 	def checkConnection(self):
@@ -175,8 +178,9 @@ class MainWindow(QW.QMainWindow, interface_Main.Ui_MainWindow):
 		# self.client.interact(self.prot.process)
 		self.prot.distrib(self.client.recv())
 		if self.prot.cnt > last_cnt:
-			if self.prot.cnt % 5 == 0:	self.update_figdata()
-			if self.prot.cnt % 10 == 0:	self.update_figure()
+			if self.prot.cnt % 3 == 0:	self.update_figdata()	# set update interval to coprime numbers to avoid these time-consuming operations crowd into one period
+			if self.prot.cnt % 5 == 0:	self.update_figure_2()	# meter figures should update more frequently to look smooth
+			if self.prot.cnt % 11== 0:	self.update_figure_1()
 
 	def update_figdata(self):	# update figure data (only data, not figure)
 		if not self.sens.checkBufferEmpty():
@@ -184,24 +188,39 @@ class MainWindow(QW.QMainWindow, interface_Main.Ui_MainWindow):
 			if self.datashow.checkBufferFull():	self.datashow.bufferShift()
 			self.datashow.bufferIn()
 
-	def update_figure(self):	# refresh figures
+	def update_figure_1(self):	# refresh curve figures
+		if not self.datashow.checkBufferEmpty():
+			buf = self.datashow.bufferGet()
+			idx = self.tabWidget.currentIndex()
+			if idx == 0:	self.widget.update(buf['forc_time'], buf['forc'])
+			elif idx == 1:	self.widget_4.update(buf['disp_time'], buf['disp'])
+			elif idx == 2:	self.widget_5.update(buf['foot_time'], buf['foot'])
+
+	def update_figure_2(self):	# refresh meter figures
 		if not self.datashow.checkBufferEmpty():
 			frame = self.datashow.last()
-			buf = self.datashow.bufferGet()
-			idx1 = self.tabWidget.currentIndex()
-			idx2 = self.tabWidget_2.currentIndex()
-
-			if idx1 == 0:	self.widget.update(buf['forc_time'], buf['forc'])
-			elif idx1 == 1:	self.widget_4.update(buf['disp_time'], buf['disp'])
-			elif idx1 == 2:	self.widget_5.update(buf['foot_time'], buf['foot'])
-
-			if idx2 == 0:
+			idx = self.tabWidget_2.currentIndex()
+			if idx == 0:
 				self.widget_3.update(*frame['imu'][0])
 				self.widget_2.update(*frame['imu'][1])
-			elif idx2 == 1:
+			elif idx == 1:
 				pass
 
+	# def update_figure(self):	# refresh all figures
+	# 	if not self.datashow.checkBufferEmpty():
+	# 		frame = self.datashow.last()
+	# 		buf = self.datashow.bufferGet()
+	# 		idx1 = self.tabWidget.currentIndex()
+	# 		idx2 = self.tabWidget_2.currentIndex()
 
+	# 		if idx1 == 0:	self.widget.update(buf['forc_time'], buf['forc'])
+	# 		elif idx1 == 1:	self.widget_4.update(buf['disp_time'], buf['disp'])
+	# 		elif idx1 == 2:	self.widget_5.update(buf['foot_time'], buf['foot'])
 
+	# 		if idx2 == 0:
+	# 			self.widget_3.update(*frame['imu'][0])
+	# 			self.widget_2.update(*frame['imu'][1])
+	# 		elif idx2 == 1:
+	# 			pass
 
 
