@@ -178,9 +178,9 @@ class MainWindow(QW.QMainWindow, interface_Main.Ui_MainWindow):
 		# self.client.interact(self.prot.process)
 		self.prot.distrib(self.client.recv())
 		if self.prot.cnt > last_cnt:
-			if self.prot.cnt % 3 == 0:	self.update_figdata()	# set update interval to coprime numbers to avoid these time-consuming operations crowd into one period
-			if self.prot.cnt % 5 == 0:	self.update_figure_2()	# meter figures should update more frequently to look smooth
-			if self.prot.cnt % 11== 0:	self.update_figure_1()
+			if self.prot.cnt % 5 == 0:	self.update_figdata()	# set different update frequencies and phases to stagger these time-consuming operations
+			if self.prot.cnt % 5 == 1:	self.update_figure_2()	# meter figures should update more frequently to look smooth
+			if self.prot.cnt % 15== 3:	self.update_figure_1()
 
 	def update_figdata(self):	# update figure data (only data, not figure)
 		if not self.sens.checkBufferEmpty():
