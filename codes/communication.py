@@ -20,18 +20,27 @@ class looptimer():
 		self.flag = False
 
 	def is_alive(self):
-		return hasattr(self, 'th') and self.th.is_alive()
+		try:	return self.thrd.is_alive()
+		except:	return False
 
 	def __start_loop(self):
 		if not self.is_alive():
-			self.th = threading.Thread(target=self.__loop)
-			self.th.start()
+			self.thrd = threading.Thread(target=self.__loop, daemon=True) # daemon means the thread terminates as the main thread exits
+			self.thrd.start()
 
 	def __loop(self):
 		while self.flag:
 			time1 = time.time()
 			self.func()
 			while time.time()-time1 < self.interval and self.flag: pass
+
+
+def MySelect(sk_list, operation):
+	sks = [ sk for sk in sk_list if sk.fileno() != -1 ]
+	if sks != []:
+		if operation == 'r': return select.select(sks, [], [], 0) [0] # select() do not accept sockets whose fileno() == -1
+		if operation == 'w': return select.select([], sks, [], 0) [1] # on Windows select() do not accept all three empty list
+	return []
 
 
 # note: socket is like a file on hardware, I/O is about the memory:
@@ -80,10 +89,10 @@ class Server():
 
 ##### read and write #####
 	def read(self):
-		for sk in select.select(self.I_sockets.keys(), [], [], 0)[0]:	# select out sockets that are ready for reading
-			if sk == self.sk0: self.add( *sk.accept() )					# new client connected
+		for sk in MySelect(self.I_sockets.keys(), 'r'):	# select out sockets that are ready for reading
+			if sk == self.sk0: self.add( *sk.accept() )	# new client connected
 			else:
-				try: datastring = sk.recv(1024)							# read message from old connections
+				try: datastring = sk.recv(1024)			# read message from old connections
 				except Exception as ex: self.remove(sk, ex)
 				else:
 					if datastring:
@@ -91,7 +100,7 @@ class Server():
 						self.decode(sk)
 
 	def write(self):
-		for sk in select.select(self.I_sockets.keys(), self.O_sockets.keys(), [], 0)[1]:  # select out sockets that are ready for writing, wait at most 1 second
+		for sk in MySelect(self.O_sockets.keys(), 'w'):  # select out sockets that are ready for writing, wait at most 1 second
 			try:
 				while self.O_sockets[sk]: sk.sendall( self.encode( self.O_sockets[sk].pop(0) ) )
 			except Exception as ex:	self.remove(sk, ex)
@@ -246,21 +255,19 @@ class Client():
 
 ##### read and write #####
 	def read(self):
-		if self.is_opened(): # this judgement is not needed in server because it removes whatever sockets that are not working
-			for sk in select.select([self.sk], [], [], 0)[0]:
-				try: datastring = sk.recv(1024)
-				except Exception as ex: pass
-				else:
-					if datastring:
-						self.I_stream += datastring
-						self.decode()
+		for sk in MySelect([self.sk], 'r'):
+			try: datastring = sk.recv(1024)
+			except Exception as ex: pass
+			else:
+				if datastring:
+					self.I_stream += datastring
+					self.decode()
 
 	def write(self):
-		if self.is_opened(): # this judgement is not needed in server because it removes whatever sockets that are not working
-			for sk in select.select([], [self.sk], [], 0)[1]:
-				try:
-					while self.O_socket: sk.sendall(self.encode(self.O_socket.pop(0)))
-				except Exception as ex: pass
+		for sk in MySelect([self.sk], 'w'):
+			try:
+				while self.O_socket: sk.sendall(self.encode(self.O_socket.pop(0)))
+			except Exception as ex: pass
 ##########################
 
 ##### decode and encode #####
@@ -310,7 +317,8 @@ class Client():
 		if self.heartbeat in self.O_socket:	self.write()
 
 	def is_opened(self):
-		return hasattr(self, 'sk') and (self.sk.fileno() != -1)
+		try:	return self.sk.fileno() != -1
+		except:	return False
 
 	def get_connection_state(self):
 		return self.flag and self.is_opened()
@@ -356,19 +364,15 @@ class test():
 		self.clt.open()
 
 
-# c = test()
-# c = test('127.0.0.1')
+if __name__ == '__main__':
+	
+	datastring = pack( '3B', 0x01, 0x01, 0x01 ) + b'test'
 
-
-
-
-# datastring = pack( '3B', 0x01, 0x01, 0x01 ) + b'test'
-
-# s = Server()
-# while True:
-# 	s.send(datastring)
-# 	time.sleep(0.02)
-# 	s.interact()
+	s = Server()
+	while True:
+		s.send(datastring)
+		time.sleep(0.02)
+		s.interact()
 
 
 

@@ -16,12 +16,12 @@ class SensorPackage():
 			'forc_time': 0.0,
 			'disp_time': 0.0,
 			'foot_time': 0.0,
-			'imt_time' : 0.0	}
+			'imu_time' : 0.0	}
 
 		# mark which term is updated and should be added into data buffer
-		self.bufinflag = { key:False for key in self.data.keys() }
+		self.bufinflag = { key:False for key in self.data.keys() } # bufferIn() and encode() will set all bufinflags to False
 
-		# data buffer. store every frame of data up to a maximum length, for file writing
+		# data buffer, store every frame of data up to a maximum length, for file writing
 		self.buflen_max = buflen_max
 		self.buflen = { key:0 for key in self.data.keys() } # keep track on the length of every term in dictionary. This length is also the index of the next element to be added
 		self.data_buf = { key:np.zeros([self.buflen_max, *np.shape(self.data[key])]) for key in self.data.keys() } # this is equivalent to: self.data_buf = { 'forc': np.zeros([self.buflen_max,4,3]), ... }
@@ -48,22 +48,22 @@ class SensorPackage():
 			flag, = unpack( 'B', datastring[0:1] )
 			idx = 1
 			if flag & 0x01:
-				self.bufinflag['forc'] = True
+				self.bufinflag['forc'], self.bufinflag['forc_time'] = True, True
 				self.data['forc_time'], = unpack( 'f', datastring[idx:idx+4] )
 				self.data['forc'][:] = np.reshape( unpack('12f', datastring[idx+4:idx+52]), [4,3] )
 				idx += 52
 			if flag & 0x02:
-				self.bufinflag['disp'] = True
+				self.bufinflag['disp'], self.bufinflag['disp_time'] = True, True
 				self.data['disp_time'], = unpack( 'f', datastring[idx:idx+4] )
 				self.data['disp'][:] = np.reshape( unpack('12f', datastring[idx+4:idx+52]), [4,3] )
 				idx += 52
 			if flag & 0x04:
-				self.bufinflag['foot'] = True
+				self.bufinflag['foot'], self.bufinflag['foot_time'] = True, True
 				self.data['foot_time'], = unpack( 'f', datastring[idx:idx+4] )
 				self.data['foot'][:] = np.reshape( unpack('12f', datastring[idx+4:idx+52]), [4,3] )
 				idx += 52
 			if flag & 0x08:
-				self.bufinflag['imu'] = True
+				self.bufinflag['imu'], self.bufinflag['imu_time'] = True, True
 				self.data['imu_time'], = unpack( 'f', datastring[idx:idx+4] )
 				self.data['imu'][:] = np.reshape( unpack('9f', datastring[idx+4:idx+40]), [3,3] )
 				idx += 40
@@ -76,10 +76,12 @@ class SensorPackage():
 		if self.bufinflag['imu'] :	flag = flag | 0x08
 
 		datastring = pack('B', flag)
-		if flag & 0x01:	datastring += pack('f', self.data['forc_time']) + pack( '12f', *np.ravel(datapack.data['forc']) )
-		if flag & 0x02:	datastring += pack('f', self.data['disp_time']) + pack( '12f', *np.ravel(datapack.data['disp']) )
-		if flag & 0x04:	datastring += pack('f', self.data['foot_time']) + pack( '12f', *np.ravel(datapack.data['foot']) )
-		if flag & 0x08:	datastring += pack('f', self.data['imu_time'] ) + pack( '9f' , *np.ravel(datapack.data['imu' ]) )
+		if flag & 0x01:	datastring += pack('f', self.data['forc_time']) + pack( '12f', *np.ravel(self.data['forc']) )
+		if flag & 0x02:	datastring += pack('f', self.data['disp_time']) + pack( '12f', *np.ravel(self.data['disp']) )
+		if flag & 0x04:	datastring += pack('f', self.data['foot_time']) + pack( '12f', *np.ravel(self.data['foot']) )
+		if flag & 0x08:	datastring += pack('f', self.data['imu_time'] ) + pack( '9f' , *np.ravel(self.data['imu' ]) )
+
+		for key in self.bufinflag.keys():	self.bufinflag[key] = False
 
 		return datastring
 

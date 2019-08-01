@@ -85,33 +85,10 @@ class MainWindow(QW.QMainWindow, interface_Main.Ui_MainWindow):
 
 
 		# set up dynamic figures
-		self.widget_group1 = [
-			# force
-			[	[self.widget, self.widget_5, self.widget_7],			# LF X | D | K
-				[self.widget_4, self.widget_6, self.widget_8],			# RF X | D | K
-				[self.widget_9, self.widget_11, self.widget_13],		# LB X | D | K
-				[self.widget_10, self.widget_12, self.widget_15]	],	# RB X | D | K
-			# displacement
-			[	[self.widget_24, self.widget_25, self.widget_26],		# LF X | D | K
-				[self.widget_14, self.widget_16, self.widget_17],		# RF X | D | K
-				[self.widget_18, self.widget_19, self.widget_20],		# LB X | D | K
-				[self.widget_21, self.widget_22, self.widget_23]	],	# RB X | D | K
-			# footend force
-			[	[self.widget_39, self.widget_40, self.widget_41],		# LF X | D | K
-				[self.widget_29, self.widget_30, self.widget_31],		# RF X | D | K
-				[self.widget_32, self.widget_33, self.widget_34],		# LB X | D | K
-				[self.widget_36, self.widget_37, self.widget_38]	]	# RB X | D | K
-		]
-
-		for ws in self.widget_group1:
-			for i in range(4):
-				for j in range(3):
-					ws[i][j].setup(0)
-		self.widget_3.setup(1)
-		self.widget_2.setup(2)
-		self.widget_27.setup(3)
-		self.widget_28.setup(4)
-
+		self.widget_2.scale = 2.0
+		for key in self.widget_5.figs.keys(): # set the title of foot end force figures to LFX, LFY, LFZ, ...
+			if key[-1] == 'D': self.widget_5.figs[key].setTitle(key[:2]+'Y')
+			if key[-1] == 'K': self.widget_5.figs[key].setTitle(key[:2]+'Z')
 
 		# set up attributes
 		self.client = Client()
@@ -129,8 +106,8 @@ class MainWindow(QW.QMainWindow, interface_Main.Ui_MainWindow):
 
 
 		# set up timers
-		self.timer0 = QC.QTimer() # control the frequency of checking connection state
-		self.timer1 = QC.QTimer() # control the frequency of communication (receiving data)
+		self.timer0 = QC.QTimer() # Check connection state
+		self.timer1 = QC.QTimer() # Communication (receive data)
 
 		self.timer0.timeout.connect(self.checkConnection)
 		self.timer1.timeout.connect(self.hear)
@@ -172,6 +149,14 @@ class MainWindow(QW.QMainWindow, interface_Main.Ui_MainWindow):
 		self.comd.switch, self.comd.gait, self.comd.rc = 0x00, 0x01, 0x00
 		self.client.send(self.prot.collect(typ=0x03, ack=0x02))
 
+	## figure tab
+	@pyqtSlot(int)
+	def on_tabWidget_currentChanged(self):
+		self.update_figure_1()
+	@pyqtSlot(int)
+	def on_tabWidget_2_currentChanged(self):
+		self.update_figure_2()
+
 
 	def checkConnection(self):
 		connected = self.client.get_connection_state()
@@ -193,8 +178,9 @@ class MainWindow(QW.QMainWindow, interface_Main.Ui_MainWindow):
 		# self.client.interact(self.prot.process)
 		self.prot.distrib(self.client.recv())
 		if self.prot.cnt > last_cnt:
-			if self.prot.cnt % 5 == 0:	self.update_figdata()
-			if self.prot.cnt % 10 == 0:	self.update_figure()
+			if self.prot.cnt % 5 == 0:	self.update_figdata()	# set different update frequencies and phases to stagger these time-consuming operations
+			if self.prot.cnt % 5 == 1:	self.update_figure_2()	# meter figures should update more frequently to look smooth
+			if self.prot.cnt % 15== 3:	self.update_figure_1()
 
 	def update_figdata(self):	# update figure data (only data, not figure)
 		if not self.sens.checkBufferEmpty():
@@ -202,27 +188,39 @@ class MainWindow(QW.QMainWindow, interface_Main.Ui_MainWindow):
 			if self.datashow.checkBufferFull():	self.datashow.bufferShift()
 			self.datashow.bufferIn()
 
-	def update_figure(self):	# refresh figures
+	def update_figure_1(self):	# refresh curve figures
+		if not self.datashow.checkBufferEmpty():
+			buf = self.datashow.bufferGet()
+			idx = self.tabWidget.currentIndex()
+			if idx == 0:	self.widget.update(buf['forc_time'], buf['forc'])
+			elif idx == 1:	self.widget_4.update(buf['disp_time'], buf['disp'])
+			elif idx == 2:	self.widget_5.update(buf['foot_time'], buf['foot'])
+
+	def update_figure_2(self):	# refresh meter figures
 		if not self.datashow.checkBufferEmpty():
 			frame = self.datashow.last()
-			buf = self.datashow.bufferGet()
-
-			key = ('forc', 'disp', 'foot')[self.tabWidget.currentIndex()]
-			widgets_curve = self.widget_group1[self.tabWidget.currentIndex()]
-			for i in range(4):
-				for j in range(3):
-					widgets_curve[i][j].update([
-						buf[key+'_time'], buf[key][:,i,j],		# real data
-						buf[key+'_time'], buf[key][:,i,j]-0.1	# expected data
-					])
-
-			if self.tabWidget_2.currentIndex() == 0:
-				self.widget_3.update(frame['imu'][0])
-				self.widget_2.update(frame['imu'][1])
-			elif self.tabWidget_2.currentIndex() == 1:
+			idx = self.tabWidget_2.currentIndex()
+			if idx == 0:
+				self.widget_3.update(*frame['imu'][0])
+				self.widget_2.update(*frame['imu'][1])
+			elif idx == 1:
 				pass
 
+	# def update_figure(self):	# refresh all figures
+	# 	if not self.datashow.checkBufferEmpty():
+	# 		frame = self.datashow.last()
+	# 		buf = self.datashow.bufferGet()
+	# 		idx1 = self.tabWidget.currentIndex()
+	# 		idx2 = self.tabWidget_2.currentIndex()
 
+	# 		if idx1 == 0:	self.widget.update(buf['forc_time'], buf['forc'])
+	# 		elif idx1 == 1:	self.widget_4.update(buf['disp_time'], buf['disp'])
+	# 		elif idx1 == 2:	self.widget_5.update(buf['foot_time'], buf['foot'])
 
+	# 		if idx2 == 0:
+	# 			self.widget_3.update(*frame['imu'][0])
+	# 			self.widget_2.update(*frame['imu'][1])
+	# 		elif idx2 == 1:
+	# 			pass
 
 
