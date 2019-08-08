@@ -4,6 +4,8 @@ from PyQt5 import QtCore as QC
 
 
 class DynamicGraphWidget_curves(pg.GraphicsLayoutWidget):
+	""" draw 12 figures on the widget """
+
 	def __init__(self, parent=None):
 		super(DynamicGraphWidget_curves, self).__init__(parent)
 
@@ -42,37 +44,11 @@ class DynamicGraphWidget_curves(pg.GraphicsLayoutWidget):
 				self.crvs[key].setData(time, data[:,i,j])
 				if len(ref_time): self.refs[key].setData(ref_time, ref_data[:,i,j])
 
-class DynamicGraphWidget_curve(pg.GraphicsLayoutWidget):
-	def __init__(self, parent=None):
-		super(DynamicGraphWidget_curve, self).__init__(parent)
-
-		self.ci.layout.setContentsMargins(0, 0, 0, 0)
-		self.ci.layout.setSpacing(0)
-
-		self.fig = self.addPlot()
-		self.fig.setRange(yRange=(-1,1))
-		self.fig.setMouseEnabled(x=False, y=False)
-		self.fig.disableAutoRange()
-		self.fig.showGrid(x=True, y=True, alpha=0.5)
-		self.fig.hideAxis('bottom')
-		self.fig.hideAxis('left')
-
-		self.crv = self.fig.plot([], [])
-		self.crv0= self.fig.plot([], [], pen={'style':QC.Qt.DotLine})
-
-		self.ran = 5.0
-
-	def update(self, x, y, x0=[], y0=[]):
-		x1, x2, ran = np.min(x), np.max(x), self.ran
-		self.fig.setRange( xRange = (x1, x1+ran) if (x2-x1<ran) else (x2-ran, x2) )
-		self.crv.setData(x, y)
-		self.crv0.setData(x0, y0)
 
 
-# IMU data define:
-# coordinate: x -> front, y -> left, z -> up
-# positive direction: yaw -> turn right, pitch -> headup, roll -> roll left
 class DynamicGraphWidget_angle(pg.GraphicsLayoutWidget):
+	""" draw a meter figure on the widget """
+
 	def __init__(self, parent=None):
 		super(DynamicGraphWidget_angle, self).__init__(parent)
 
@@ -97,6 +73,10 @@ class DynamicGraphWidget_angle(pg.GraphicsLayoutWidget):
 			crv.setPen(style=QC.Qt.DotLine)
 
 	def update(self, yaw, pitch, roll):
+		""" IMU data defined as follows: """
+		""" coordinate: x -> front, y -> left, z -> up """
+		""" positive direction: yaw -> turn right, pitch -> headup, roll -> roll left """
+
 		PI = np.pi
 		# rescale and limitate the data so that they can all be treated as angles
 		alfa, beta, gama = np.array([yaw, pitch, roll]) * PI/180 / self.scale
@@ -129,6 +109,8 @@ class DynamicGraphWidget_veloc(pg.GraphicsLayoutWidget):
 
 
 if __name__ == '__main__':
+	""" this is just for debug """
+
 	import sys
 	from PyQt5 import QtWidgets as QW
 
@@ -150,8 +132,32 @@ if __name__ == '__main__':
 
 
 
+class DynamicGraphWidget_curve(pg.GraphicsLayoutWidget):
+	""" draw one figure on the widget. this class is depricated """
+	def __init__(self, parent=None):
+		super(DynamicGraphWidget_curve, self).__init__(parent)
 
+		self.ci.layout.setContentsMargins(0, 0, 0, 0)
+		self.ci.layout.setSpacing(0)
 
+		self.fig = self.addPlot()
+		self.fig.setRange(yRange=(-1,1))
+		self.fig.setMouseEnabled(x=False, y=False)
+		self.fig.disableAutoRange()
+		self.fig.showGrid(x=True, y=True, alpha=0.5)
+		self.fig.hideAxis('bottom')
+		self.fig.hideAxis('left')
+
+		self.crv = self.fig.plot([], [])
+		self.crv0= self.fig.plot([], [], pen={'style':QC.Qt.DotLine})
+
+		self.ran = 5.0
+
+	def update(self, x, y, x0=[], y0=[]):
+		x1, x2, ran = np.min(x), np.max(x), self.ran
+		self.fig.setRange( xRange = (x1, x1+ran) if (x2-x1<ran) else (x2-ran, x2) )
+		self.crv.setData(x, y)
+		self.crv0.setData(x0, y0)
 
 
 

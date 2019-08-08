@@ -18,25 +18,28 @@ class DialogPose(QW.QDialog, interface_PoseParam.Ui_Dialog):
 		self.gait_keys = ['walk', 'trot', 'climb', 'obstacle', 'jump', 'run'] # key list of ParameterPackage.data, according to the order of combobox
 
 
-	@pyqtSlot(int) # gait chosen
+	@pyqtSlot(int)
 	def on_comboBox_currentIndexChanged(self):
+		""" when a gait is chosen, show the corresponding parameters """
 		self.set_text(col1=False, col2=True)
 
-	@pyqtSlot() # left column set to default parameters
+	@pyqtSlot()
 	def on_pushButton_4_clicked(self):
+		""" set the left column to default parameters """
 		para_temp = ParameterPackage() # default parameters loaded as soon as this class is created
 		key = 'init'
 		self.para.data[key][:] = para_temp.data[key]
 		self.set_text(col1=True, col2=False)
 
-	@pyqtSlot() # right column set to default parameters
+	@pyqtSlot()
 	def on_pushButton_3_clicked(self):
+		""" set the right column to default parameters """
 		para_temp = ParameterPackage() # default parameters loaded as soon as this class is created
 		key = self.gait_keys[self.comboBox.currentIndex()]
 		self.para.data[key][:] = para_temp.data[key]
 		self.set_text(col1=False, col2=True)
 
-
+	""" every time finishing editing the text box, save the number if it is valid """
 	@pyqtSlot()
 	def on_lineEdit_editingFinished(self):
 		try:	self.para.data['init'][0] = float( self.lineEdit.text() )
@@ -115,48 +118,58 @@ class MainWindow(QW.QMainWindow, interface_Main.Ui_MainWindow):
 		self.timer0.start(1000) # check connection state every 1 second, start as soon as the UI is launched
 		self.timer1.setInterval(40)
 
+########## set up slots ##########
 
-	### set up slots
-
-	## connection
-	@pyqtSlot() # connect
+##### connection #####
+	@pyqtSlot()
 	def on_pushButton_5_clicked(self):
+		""" connect """
 		self.client.serverIP = self.lineEdit_7.text()
 		self.client.open()
 		self.checkConnection()
 
-	@pyqtSlot() # disconnect
+	@pyqtSlot()
 	def on_pushButton_6_clicked(self):
+		""" disconnect """
 		self.client.close()
 		self.checkConnection()
+######################
 
-	## parameter setting
-	@pyqtSlot() # set parameters
+##### parameter setting #####
+	@pyqtSlot()
 	def on_pushButton_3_clicked(self):
+		""" pop out the dialog for parameter setting """
 		self.dialpose.para.decode('copy', datacopy=self.para.data)
 		self.dialpose.set_text()
 		self.dialpose.show()
 
-	@pyqtSlot() # save parameters
-	def on_dialpose_accepted(self): # no reponse using @pyqtSlot, do not know why...
+	@pyqtSlot() # no reponse using @pyqtSlot, do not know why..., so this function is explicitly connected to self.dialpose
+	def on_dialpose_accepted(self):
+		""" save and send out the parameters if the 'save' button is clicked """
 		self.para.decode('copy', datacopy=self.dialpose.para.data)
 		self.para.save()
 		self.client.send(self.prot.collect(typ=0x04, ack=0x04))
+#############################
 
-	## command buttons
+##### command buttons #####
 	@pyqtSlot()
 	def on_pushButton_11_clicked(self):
+		""" send walk gait command """
 		self.comd.switch, self.comd.gait, self.comd.rc = 0x00, 0x01, 0x00
 		self.client.send(self.prot.collect(typ=0x03, ack=0x02))
+###########################
 
-	## figure tab
+##### figure tab #####
 	@pyqtSlot(int)
 	def on_tabWidget_currentChanged(self):
 		self.update_figure_1()
 	@pyqtSlot(int)
 	def on_tabWidget_2_currentChanged(self):
 		self.update_figure_2()
+######################
 
+
+########## other methods ##########
 
 	def checkConnection(self):
 		connected = self.client.get_connection_state()
@@ -175,20 +188,22 @@ class MainWindow(QW.QMainWindow, interface_Main.Ui_MainWindow):
 
 	def hear(self):
 		last_cnt = self.prot.cnt
-		# self.client.interact(self.prot.process)
-		self.prot.distrib(self.client.recv())
+		# self.client.interact(self.prot.process)	# this do not dump any frame
+		self.prot.distrib(self.client.recv())	# this returns the newest frame and dump the others
 		if self.prot.cnt > last_cnt:
 			if self.prot.cnt % 5 == 0:	self.update_figdata()	# set different update frequencies and phases to stagger these time-consuming operations
 			if self.prot.cnt % 5 == 1:	self.update_figure_2()	# meter figures should update more frequently to look smooth
 			if self.prot.cnt % 15== 3:	self.update_figure_1()
 
-	def update_figdata(self):	# update figure data (only data, not figure)
+	def update_figdata(self):
+		""" update figure data (only data, not figure) """
 		if not self.sens.checkBufferEmpty():
 			self.datashow.decode('copy', datacopy=self.sens.filter())
 			if self.datashow.checkBufferFull():	self.datashow.bufferShift()
 			self.datashow.bufferIn()
 
-	def update_figure_1(self):	# refresh curve figures
+	def update_figure_1(self):
+		""" refresh curve figures """
 		if not self.datashow.checkBufferEmpty():
 			buf = self.datashow.bufferGet()
 			idx = self.tabWidget.currentIndex()
@@ -196,7 +211,8 @@ class MainWindow(QW.QMainWindow, interface_Main.Ui_MainWindow):
 			elif idx == 1:	self.widget_4.update(buf['disp_time'], buf['disp'])
 			elif idx == 2:	self.widget_5.update(buf['foot_time'], buf['foot'])
 
-	def update_figure_2(self):	# refresh meter figures
+	def update_figure_2(self):
+		""" refresh meter figures """
 		if not self.datashow.checkBufferEmpty():
 			frame = self.datashow.last()
 			idx = self.tabWidget_2.currentIndex()
@@ -206,21 +222,7 @@ class MainWindow(QW.QMainWindow, interface_Main.Ui_MainWindow):
 			elif idx == 1:
 				pass
 
-	# def update_figure(self):	# refresh all figures
-	# 	if not self.datashow.checkBufferEmpty():
-	# 		frame = self.datashow.last()
-	# 		buf = self.datashow.bufferGet()
-	# 		idx1 = self.tabWidget.currentIndex()
-	# 		idx2 = self.tabWidget_2.currentIndex()
 
-	# 		if idx1 == 0:	self.widget.update(buf['forc_time'], buf['forc'])
-	# 		elif idx1 == 1:	self.widget_4.update(buf['disp_time'], buf['disp'])
-	# 		elif idx1 == 2:	self.widget_5.update(buf['foot_time'], buf['foot'])
 
-	# 		if idx2 == 0:
-	# 			self.widget_3.update(*frame['imu'][0])
-	# 			self.widget_2.update(*frame['imu'][1])
-	# 		elif idx2 == 1:
-	# 			pass
 
 

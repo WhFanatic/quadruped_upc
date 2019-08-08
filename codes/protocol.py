@@ -6,7 +6,9 @@ from struct import pack, unpack
 
 
 class SensorPackage():
+
 	def __init__(self, buflen_max=500):
+
 		# data dictionary. store 1 frame of data and their conrresponding time (time is also treated as data)
 		self.data = {
 			'forc': np.zeros([4,3]), # hydraulic cylinder force ( dim0: 4 legs [LF | RF | LB | RB]; dim1: 3 joints )
@@ -85,14 +87,16 @@ class SensorPackage():
 
 		return datastring
 
-	def bufferIn(self): # add the current frame to the buffer. Attention: must check whether the buffer is full before operation
+	def bufferIn(self):
+		""" add the current frame to the buffer. Attention: must check whether the buffer is full before operation """
 		for key in self.data.keys():
 			if self.bufinflag[key]:
 				self.data_buf[key][self.buflen[key]] = self.data[key]
 				self.buflen[key] += 1
 				self.bufinflag[key] = False
 
-	def bufferOut(self): # write the buffer to file and reset the buffer state (in case the buffer is full)
+	def bufferOut(self):
+		""" write the buffer to file and reset the buffer state (in case the buffer is full) """
 		for key in self.data.keys():
 			if self.buflen[key] == self.buflen_max: # only the full-buffer terms will be written
 				with open(self.filepath+self.filenames[key], 'a') as fp:
@@ -123,25 +127,30 @@ class SensorPackage():
 			print('Invalid sensor data !')
 			return False
 
-	def checkBufferFull(self): # if any buffer is full, either bufferOut() or bufferShift() should be called before next bufferIn()
+	def checkBufferFull(self):
+		""" check wether the buffers are full. if any buffer is full, either bufferOut() or bufferShift() should be called before next bufferIn() """
 		return ( self.buflen_max in self.buflen.values() )
 
-	def checkBufferEmpty(self): # if any buffer is empty, filter() and last() cannot be called
+	def checkBufferEmpty(self):
+		""" check wether the buffers are empty. if any buffer is empty, filter() and last() cannot be called """
 		return ( 0 in self.buflen.values() )
 
 ##### these two methods are for dynamic figure data #####
-	def bufferShift(self): # shift the buffer one frame backward (in case the buffer is full)
+	def bufferShift(self):
+		""" shift the buffer one frame backward (in case the buffer is full) """
 		for key in self.data.keys():
 			if self.buflen[key] == self.buflen_max:
 				self.data_buf[key][:] = np.roll(self.data_buf[key], -1, axis=0)
 				self.buflen[key] -= 1
 
-	def filter(self, filter_size=5): # generate filtered data by averaging the newest 5 frames. Attention: must check whether the buffer is empty before operation
+	def filter(self, filter_size=5):
+		""" generate filtered data by averaging the newest 5 frames. Attention: must check whether the buffer is empty before operation """
 		filter_range = { key:range( max(self.buflen[key]-filter_size, 0), self.buflen[key] ) for key in self.data.keys() }
 		return { key:np.mean( self.data_buf[key][filter_range[key]], axis=0 ) for key in self.data.keys() }
 #########################################################
 
-	def test(self): # generate random numbers as test data
+	def test(self):
+		""" generate random numbers as test data """
 		test_data = { key:np.random.rand(*np.shape(self.data[key])) for key in self.data.keys() }
 		test_data['imu'][0] = test_data['imu'][0] * 180.0 - 90
 		test_data['imu'][1] = test_data['imu'][1] * 180.0 * 2 - 180.0
@@ -149,10 +158,12 @@ class SensorPackage():
 			if 'time' in key:	test_data[key] = time.time()
 		return test_data
 
-	def last(self): # return the last frame in data_buf. Attention: must check whether the buffer is full before operation
+	def last(self):
+		""" return the last frame in data_buf. Attention: must check whether the buffer is empty before operation """
 		return { key:self.data_buf[key][self.buflen[key]-1] for key in self.data.keys() }
 
 	def bufferGet(self):
+		""" get the valid section of the buffer """
 		return { key:self.data_buf[key][:self.buflen[key]] for key in self.data.keys() }
 
 
@@ -243,8 +254,9 @@ class ParameterPackage():
 				fp.write( '\t'.join(['%.18e'%n for n in self.data[key]]) + '\t$ %s\n'%key )
 
 
-# in main charge of all the communication
 class Protocol():
+	""" this is a main class, it manages other 4 classes, and it should be in charge of all the communication """
+
 	def __init__(self):
 		self.ver = 0x01
 		self.ack = 0x00
@@ -258,22 +270,27 @@ class Protocol():
 
 		self.cnt = 0 # how many data packages have been processed
 
-	def distrib(self, datastring):	# for receive in communication
+	def distrib(self, datastring):
+		""" process the received data: do a first-layer-decode and distribute the data to the class specified by /typ/ """
 		if type(datastring) == bytes and len(datastring) >= 3:
 			self.decode(datastring)
 			self.cnt += 1
 
-	def collect(self, typ, ack):	# for send in communication
+	def collect(self, typ, ack):
+		""" collect the data before send """
 		self.typ = typ
 		self.ack = ack if ack else 0x00
 		return self.encode()
 
-	def process(self, datastring):	# for interact in communication
+	def process(self, datastring):
+		""" when a frame is received, first distribute it for decode and then collect the answer messages """
+		""" this is for /interact/ in communication """
 		self.distrib(datastring)
 		if self.ack: return self.collect(typ=self.ack, ack=0x00)
 		else: return None
 
 	def decode(self, datastring):
+		""" first-layer-decode, extract the frame header """
 		self.ver, = unpack( 'B', datastring[0:1] )
 		self.ack, = unpack( 'B', datastring[1:2] )
 		self.typ, = unpack( 'B', datastring[2:3] )
